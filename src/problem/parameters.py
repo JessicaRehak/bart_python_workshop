@@ -4,6 +4,8 @@ class Standard:
     holder = dict()
     ranges = []
 
+    newHolder = [] # each value in newHolder is the string written in a file
+
     def setDiscretization(self, value, limit=None):
         self.fieldAdder("ho spatial discretization",value,limit)
     def setEigenvalueProblem(self, value, limit=None):
@@ -97,14 +99,27 @@ class Standard:
                 print("ERROR: " + str(value) + " is not an accepted value for " + field + ".")
                 return
         if type(value) is list: # you input a range of values for one 
-            self.ranges.append((field, value))
+            currAmount = len(self.newHolder)
+            temp = []
+            for i in range(currAmount):
+                currStatus = self.newHolder[i]
+                for j in value:
+                    temp.append(currStatus + field + " = " + str(j) + "\n")
+            self.newHolder = temp
+
         else:
-            self.holder[field] = value
+            writtenUp = field + " = " + str(value)+"\n"
+            if self.newHolder:
+                for i in range(len(self.newHolder)):
+                    currString = self.newHolder[i] + writtenUp
+                    self.newHolder[i] = currString
+            else: 
+                self.newHolder.append(writtenUp)
     
     def snapshot(self):
-        for i in self.holder:
-             print(str(i) + " = " + str(self.holder[i]))
-        print(str(self.ranges[0][0]) + " = " + str(self.ranges[0][1]))
+        for i in range(len(self.newHolder)):
+            print("File " + str(i+1) + "\n")
+            print(self.newHolder[i])
 
     def saveAs(self, pathname): 
         temp = pathname.split("/")
@@ -113,22 +128,7 @@ class Standard:
             os.mkdir(directories)
         except FileExistsError:
             pass
-        if len(self.ranges) > 0:
-            if len(self.ranges) > 1:
-                print("Error—only try inputting one range right now")
-            else:
-                print(self.ranges[0][1])
-                for i in range(len(self.ranges[0][1])):
-                    currFile = directories + filename+"-"+str(i)+".input"
-                    print(currFile)
-                    with open(currFile,"w") as file:
-                        for j in self.holder:
-                            file.write(j+ " = " + str(self.holder[j])+ "\n")
-
-
-                        file.write(self.ranges[0][0] + " = " + str(self.ranges[0][1][i]) + "\n")
-        else:
-            with open(directories + filename+".input","w") as file:
-                for i in self.holder:
-                    file.write(i + " = " + str(self.holder[i]) + "\n")
+        for i in range(len(self.newHolder)):
+            with open(directories+filename+"-"+str(i) + ".input","w") as file:
+                file.write(self.newHolder[i])
         print("Files saved to " + pathname)
