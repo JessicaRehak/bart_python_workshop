@@ -1,10 +1,19 @@
 import os
+from enum import Enum
+class ReflectiveBoundaries(Enum):
+    xMin = "xmin"
+    xMax = "xmax"
+    yMin = "ymin"
+    yMax = "ymax"
+    zMin = "zmin"
+    zMax = "zmax"
+
+class TransportModelType(Enum):
+    Diffusion = "diffusion"
+    SAAF = "saaf"
 
 class Standard:
-    holder = dict()
-    ranges = []
-
-    newHolder = [] # each value in newHolder is the string written in a file
+    newHolder = [] 
 
     def setDiscretization(self, value, limit=None):
         self.fieldAdder("ho spatial discretization",value,limit)
@@ -23,13 +32,19 @@ class Standard:
     def setOutputFilenameBase(self, value, limit=str):
         self.fieldAdder("output file name base",value,limit)
     def setReflectiveBoundary(self, value, limit=None):
-        self.fieldAdder("reflective boundary names",value,limit)
+        if isinstance(value,ReflectiveBoundaries):
+            self.fieldAdder("reflective boundary names",value.value)
+        else:
+            print("ERROR: " + str(value) + " is not an accepted value for reflective boundary.")
     def setSpatialDimension(self, value, limit=[1,2,3]):
         self.fieldAdder("problem dimension",value,limit)
     def setSpatialMax(self, value, limit=None):
         self.fieldAdder("x, y, z max values of boundary locations",value,limit)
     def setTransportModel(self, value, limit=None):
-        self.fieldAdder("transport model",value,limit)
+        if isinstance(value,TransportModelType):
+            self.fieldAdder("transport model",value.value)
+        else:
+            print("ERROR: " + str(value) + " is not an accepted value for transport model.")
 
     # Mesh
     def setMeshGenerated(self, value, limit=None):
